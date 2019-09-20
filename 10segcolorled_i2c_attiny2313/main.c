@@ -117,8 +117,9 @@ void flush_led( uint16_t posbit, uint8_t colorbit ){
 
     tmpb = ( 0b10100000 & tmpb ) |
     ( 0b00000111 & ( posbit >> 7 ) ) |
-    ( ( ( 0b00011000 ) & ( colorbit << 3 ) ) ^ 0b00011000 ) |
-    ( ( ( 0b01000000 ) & ( colorbit << 4 ) ) ^ 0b01000000 );
+    ( ( ( 0b01000000 ) & ( colorbit << 4 ) ) ^ 0b01000000 ) |  // r
+    ( ( ( 0b00010000 ) & ( colorbit << 4 ) ) ^ 0b00010000 ) |  // b
+    ( ( ( 0b00001000 ) & ( colorbit << 2 ) ) ^ 0b00001000 );   // g
     tmpd = ( 0b10000000 & tmpd ) | ( 0b01111111 & posbit );
 
     PORTB = tmpb;

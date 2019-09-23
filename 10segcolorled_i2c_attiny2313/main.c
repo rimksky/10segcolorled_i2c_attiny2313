@@ -7,12 +7,16 @@
 
 /*
     ATtiny2313 fuse factory default LOW:0x64 HIGH:0xDF EXT:0xFF LOCK:0xFF
-    I2C Address(Default): 0x55
+    I2C Address:
+      d0:NC d1:NC  0x55 (default)
+      d0:L  d1:NC  0x56
+      d0:NC d1:L   0x57
+      d0:L  d1:L   0x58
 
     port mapping [ATtiny2313]
 
     bit      7    6    5    4    3    2    1    0
-    PORTA    -    -    -    -    -    -    -    -
+    PORTA    -    -    -    -    -    -   d1   d0
     PORTB    -    r    -    b    g    J    I    H
     PORTD    -    G    F    E    D    C    B    A
 
@@ -24,6 +28,9 @@
     r - 150R - GND
     b - 100R - GND
     g - 100R - GND
+
+    d0 - sw - GND
+    d1 - sw - GND
 */
 
 #include <avr/io.h>
@@ -65,6 +72,7 @@ uint8_t i2c_register[] =
 };
 #endif
 const uint8_t i2c_register_size = sizeof(i2c_register);
+uint8_t add_address;
 
 
 /******************************************************************************
@@ -76,6 +84,9 @@ void init_cpu(void)
     CLKPR = 0b10000000; // CLKPCE=enable,  CLKPS3,2,1,0=clear
     CLKPR = 0b00000011; // CLKPCE=disable, CLKPS3,2,1,0=0b0011(1/8)
 
+    // Port Data Direction Register (10seg LED : Input)
+    DDRA  &= ~(_BV(DDRA0) | _BV(DDRA1));
+
     // Port Data Direction Register (10seg LED : Output)
     DDRB  |= (_BV(DDB0) | _BV(DDB1) | _BV(DDB2) | _BV(DDB3) | _BV(DDB4)             | _BV(DDB6));
     DDRD  |= (_BV(DDD0) | _BV(DDD1) | _BV(DDD2) | _BV(DDD3) | _BV(DDD4) | _BV(DDD5) | _BV(DDD6));
@@ -85,6 +96,7 @@ void init_cpu(void)
     PORTD &=  ~(_BV(PORTD0) | _BV(PORTD1) | _BV(PORTD2) | _BV(PORTD3) | _BV(PORTD4) | _BV(PORTD5) | _BV(PORTD6));
 
     // Port Data Register (10seg LED color switch : Active-High)
+    PORTA |= (_BV(PORTA0) | _BV(PORTA1));  // pull-up
     PORTB |= (_BV(PORTB3) | _BV(PORTB4) | _BV(PORTB6));
 
     // Timer/Counter
@@ -97,6 +109,14 @@ void init_cpu(void)
                                 //  => don't use.
     TIMSK = _BV(OCIE0A);        // Timer/Counter Interrupt Mask Register
                                 // => Output Compare Match A Interrupt Enable
+    // Add Address
+    add_address = 0;
+    if( ( ~PINA & _BV(PINA0) ) == _BV(PINA0) ){
+      add_address += 1;
+    }
+    if( ( ~PINA & _BV(PINA1) ) == _BV(PINA1) ){
+      add_address += 2;
+    }
 
     return;
 }
@@ -158,7 +178,7 @@ int main(void)
     uint8_t i;
 
     init_cpu();
-    usiTwiSlaveInit(SLAVE_ADDRESS);
+    usiTwiSlaveInit(SLAVE_ADDRESS + add_address);
     sei();
 
     while (1) 

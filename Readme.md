@@ -19,6 +19,10 @@ As described in the AVR312 document, the I2C library ignores the stop condition,
 so it depends on the timing of command analysis of the buffer passed to the upper layer.  
 Due to the simplicity of the command system, malfunctions may occur depending on the timing of command reception. 
 
+In the case of the arduino Wire library for the I2C master, I2C reception errors could hardly be confirmed.  
+However, it was confirmed that I2C bus lock occurred by issuing consecutive commands.  
+It is recommended to delay about 10ms after sending one command.  
+
 
 ## Demo Circut
 
@@ -26,12 +30,16 @@ Due to the simplicity of the command system, malfunctions may occur depending on
 
 ```
     ATtiny2313 fuse factory default LOW:0x64 HIGH:0xDF EXT:0xFF LOCK:0xFF
-    I2C Address(Default): 0x55
+    I2C Address:
+      d0:NC d1:NC  0x55 (default)
+      d0:L  d1:NC  0x56
+      d0:NC d1:L   0x57
+      d0:L  d1:L   0x58
 
     port mapping [ATtiny2313]
 
     bit      7    6    5    4    3    2    1    0
-    PORTA    -    -    -    -    -    -    -    -
+    PORTA    -    -    -    -    -    -   d1   d0
     PORTB    -    r    -    b    g    J    I    H
     PORTD    -    G    F    E    D    C    B    A
 
@@ -43,6 +51,9 @@ Due to the simplicity of the command system, malfunctions may occur depending on
     r - 150R - GND
     b - 100R - GND
     g - 100R - GND
+
+    d0 - sw - GND
+    d1 - sw - GND
 ```
 
 

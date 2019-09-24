@@ -1,8 +1,8 @@
-10seg color LED (OSX10201-LRPB2) I2C driver using attiny2313
+10seg color LED (OSX10201-LRPB2) I2C slave driver using attiny2313
 ====
 
 ## Description
-A program 10seg color LED (OSX10201-LRPB2) I2C driver using attiny2313.  
+A program 10seg color LED (OSX10201-LRPB2) I2C slave driver using attiny2313.  
 (Atmel Studio 7 project files)  
 
 By using the I2C command, you can easily turn on and off any LED with any color.  
@@ -14,6 +14,7 @@ Details of the I2C command can be found in the following PDF.
 
 The operation of this program has been confirmed using the i2cget / i2cset command of Raspberry Pi 3.  
 In some cases, commands may not be received.  
+To avoid I2C bus lock due to reception error, WDT is set to 250ms.  
 
 As described in the AVR312 document, the I2C library ignores the stop condition,   
 so it depends on the timing of command analysis of the buffer passed to the upper layer.  
@@ -23,6 +24,7 @@ In the case of the arduino Wire library for the I2C master, I2C reception errors
 However, it was confirmed that I2C bus lock occurred by issuing consecutive commands.  
 It is recommended to delay about 10ms after sending one command.  
 
+Four I2C addresses can be selected from 0x55 to 0x58 depending on whether PA0 / PA1 is connected to GND.
 
 ## Demo Circut
 

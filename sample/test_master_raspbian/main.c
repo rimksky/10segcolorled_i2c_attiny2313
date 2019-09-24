@@ -33,7 +33,7 @@ int main( int argc, char **argv)
     temp = check_cpu_temp();
     set_color_temp( temp, buf );
     i2c_write( fd, buf, 20 );
-    sleep(1);
+    usleep(500000);
   }
 
   exit( 0 );

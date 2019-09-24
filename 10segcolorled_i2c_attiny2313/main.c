@@ -34,8 +34,8 @@
 */
 
 #include <avr/io.h>
-#include <avr/sleep.h>
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
 
 //#define DEBUG_INIT
 #define SLAVE_ADDRESS 0x55
@@ -118,6 +118,9 @@ void init_cpu(void)
       add_address += 2;
     }
 
+    // enable wdt
+    wdt_enable(WDTO_250MS);
+
     return;
 }
 
@@ -183,6 +186,7 @@ int main(void)
 
     while (1) 
     {
+        wdt_reset();
         if (usiTwiDataInReceiveBuffer()){
             is_read_register = 0;
             r = 0;
